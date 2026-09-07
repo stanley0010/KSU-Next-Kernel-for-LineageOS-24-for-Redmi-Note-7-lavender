@@ -149,3 +149,10 @@ bindings/display/qcom
 
 # Object directory
 out/
+
+# KernelSU-Next local clone and flash zips
+KernelSU-Next/
+dist/
+drivers/kernelsu
+ksu/AnyKernel3/
+*.zip
