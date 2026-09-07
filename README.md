@@ -13,6 +13,8 @@ Tested on LineageOS 24.0. Kprobe/tracepoint hooks bootlooped on this tree
 Flash at your own risk. Keep a known-good kernel zip (for example SouthWest-NG
 0.17.3) on the device and a working recovery (OrangeFox/TWRP) before you try a
 new build.
+<img width="1080" height="2340" alt="los-24-lavender" src="https://github.com/user-attachments/assets/677f5ea8-d125-4ade-b3cd-939e4fb54eeb" />
+<img width="1080" height="2340" alt="kernelSU-next-working" src="https://github.com/user-attachments/assets/aea63b42-b744-4e31-9b29-f2920574a435" />
 
 ## Features
 
