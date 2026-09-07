@@ -34,6 +34,7 @@ resolve_anykernel() {
 	for candidate in \
 		"${ANYKERNEL_DIR:-}" \
 		"${ROOT}/../AnyKernel3-southwest" \
+		"${ROOT}/../../AnyKernel3-southwest" \
 		"${ROOT}/../AnyKernel3" \
 		"${ROOT}/ksu/AnyKernel3"
 	do

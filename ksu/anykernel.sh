@@ -46,5 +46,8 @@ if [ -f $split_img/ramdisk.cpio ]; then
   repack_ramdisk;
 fi;
 flash_boot;
-flash_dtbo;
+# osm0sis AnyKernel3 has no flash_dtbo helper; dtbo is not in this zip.
+if type flash_dtbo >/dev/null 2>&1; then
+  flash_dtbo;
+fi
 ## end boot install

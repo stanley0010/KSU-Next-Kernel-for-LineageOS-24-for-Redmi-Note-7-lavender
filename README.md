@@ -43,8 +43,11 @@ Prebuilt flashable zips belong in **GitHub Releases**, not in git.
 
 ## Build (Linux or WSL)
 
-Do **not** compile on native Windows NTFS. Clone onto a Linux filesystem
-(WSL ext4, not `/mnt/c`). CRLF line endings will break the build scripts.
+Do **not** compile on native Windows NTFS or `/mnt/c`. `./ksu/build.sh`
+refuses to run there. CRLF line endings and 9p/drvfs I/O will break the
+4.19 LTO build.
+
+On a native Linux clone:
 
 ```bash
 git clone https://github.com/stanley0010/KSU-Next-Kernel-for-LineageOS-24-for-Redmi-Note-7-lavender.git
@@ -53,6 +56,24 @@ cd KSU-Next-Kernel-for-LineageOS-24-for-Redmi-Note-7-lavender
 bash ksu/setup.sh --deps
 bash ksu/build.sh --pack
 ```
+
+On WSL2 (Ubuntu 22.04 + Clang 14), keep the checkout on `/mnt/c` if you
+want, but **do not rsync that working tree**. NTFS/9p turns kernel
+symlinks into text files and collapses `xt_DSCP.c` / `xt_dscp.c`. Sync
+with git onto ext4:
+
+```bash
+# from /mnt/c/.../android_kernel_xiaomi_sdm660_southwest-ng
+bash ksu/setup.sh --deps
+bash ksu/wsl-sync.sh
+cd ~/ksu-build/kernel
+bash ksu/build.sh --pack
+```
+
+`wsl-sync.sh` `git clone`s into `~/ksu-build/kernel` (override with
+`KSU_WSL_DEST`) with `core.symlinks=true`, overlays the local hook
+patches, and relinks `drivers/kernelsu`. The zip is written to `dist/`
+in that copy.
 
 `setup.sh` clones KernelSU-Next (`v3.2.0-legacy` by default) and creates
 `drivers/kernelsu` → `KernelSU-Next/kernel`.
@@ -78,7 +99,9 @@ minutes on a 16-thread CPU.
 | `fs/exec.c` | `do_execveat_common` | `ksu_handle_execveat` |
 | `fs/open.c` | `do_faccessat` | `ksu_handle_faccessat` |
 | `fs/read_write.c` | `ksys_read` | `ksu_handle_sys_read` |
+| `fs/read_write.c` | `vfs_read` | `ksu_handle_vfs_read` |
 | `fs/stat.c` | `newfstatat` (+ compat) | `ksu_handle_stat` |
+| `fs/stat.c` | `newfstat` | `ksu_handle_newfstat_ret` |
 | `kernel/reboot.c` | `sys_reboot` | `ksu_handle_sys_reboot` |
 | `drivers/input/input.c` | `input_handle_event` | `ksu_handle_input_handle_event` |
 

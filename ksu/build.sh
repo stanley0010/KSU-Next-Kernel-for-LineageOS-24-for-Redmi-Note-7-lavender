@@ -32,6 +32,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "${ROOT}"
 
+fstype="$(findmnt -no FSTYPE . 2>/dev/null || true)"
+if [[ "${ROOT}" == /mnt/[a-z]/* ]] || [[ "${fstype}" == 9p || "${fstype}" == drvfs || "${fstype}" == fuse.drvfs ]]; then
+	echo "error: this tree is on a Windows filesystem (${fstype:-${ROOT}})." >&2
+	echo "       Copy it to WSL ext4 first, then build:" >&2
+	echo "         bash ksu/wsl-sync.sh" >&2
+	echo "         cd \"\${KSU_WSL_DEST:-\$HOME/ksu-build/kernel}\" && bash ksu/build.sh --pack" >&2
+	exit 1
+fi
+
 DEVICE="${DEVICE:-lavender}"
 JOBS="${JOBS:-$(nproc)}"
 OUT="${ROOT}/out"
@@ -114,6 +123,10 @@ if grep -q '^CONFIG_KSU_KPROBES_HOOK=y' "${OUT}/.config"; then
 fi
 if ! grep -q 'ksu_handle_sys_reboot' kernel/reboot.c; then
 	echo "error: kernel/reboot.c is missing ksu_handle_sys_reboot (manual hook)." >&2
+	exit 1
+fi
+if ! grep -q 'ksu_handle_vfs_read' fs/read_write.c; then
+	echo "error: fs/read_write.c is missing ksu_handle_vfs_read (init.rc injection)." >&2
 	exit 1
 fi
 
